@@ -1,8 +1,11 @@
 package co.lemnisk;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +27,13 @@ public class DMPSftpDataSourceController {
   }
   
   @GetMapping("/datasource/{Id}")
-  public DMPSftpDataSource get(@PathVariable Integer Id) {
-    return service.get(Id);
+  public ResponseEntity<DMPSftpDataSource> get(@PathVariable Integer Id) {
+    try {
+      DMPSftpDataSource dmpSftpDataSource = service.get(Id);
+      return new ResponseEntity<DMPSftpDataSource>(dmpSftpDataSource, HttpStatus.OK);
+    } catch (NoSuchElementException e) {
+      return new ResponseEntity<DMPSftpDataSource>(HttpStatus.NOT_FOUND);
+    }
   }
   
   @PostMapping("/datasource")
@@ -36,12 +44,26 @@ public class DMPSftpDataSourceController {
   }
   
   @PutMapping("/datasource/{Id}")
-  public void update(@RequestBody DMPSftpDataSource dmpSftpDataSource, @PathVariable Integer Id) {
-    service.save(dmpSftpDataSource);
+  public ResponseEntity<?> update(@RequestBody DMPSftpDataSource dmpSftpDataSource, @PathVariable Integer Id) {
+    try {
+      DMPSftpDataSource existDmpSftpDataSource = service.get(Id);
+      service.save(dmpSftpDataSource);
+      
+      return new ResponseEntity<>(HttpStatus.OK);
+    }catch(NoSuchElementException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
   }
   
   @DeleteMapping("/datasource/{Id}")
-  public void delete(@PathVariable Integer Id) {
-    service.delete(Id);
+  public ResponseEntity<?> delete(@PathVariable Integer Id) {
+    try {
+      DMPSftpDataSource existDmpSftpDataSource = service.get(Id);
+      service.delete(Id);
+      
+      return new ResponseEntity<>(HttpStatus.OK);
+    }catch(NoSuchElementException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
   }
 }
